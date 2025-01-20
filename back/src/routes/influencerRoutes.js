@@ -1,0 +1,87 @@
+const express = require('express');
+const router = express.Router();
+const axios = require('axios');
+
+// Ruta para obtener influencers
+router.get('/', (req, res) => {
+    res.send('Endpoint para buscar influencers');
+});
+
+
+router.get('/tweets', async (req, res) => {
+    const username = req.query.username; // Obtener nombre del influencer
+    if (!username) return res.status(400).send('Username es requerido');
+
+    try {
+        const response = await axios.get(
+            `https://api.twitter.com/2/users/by/username/${username}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
+                },
+            }
+        );
+
+        const userId = response.data.data.id;
+
+        // Obtener tweets recientes del usuario
+        const tweetsResponse = await axios.get(
+            `https://api.twitter.com/2/users/${userId}/tweets`,
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
+                },
+            }
+        );
+
+        res.json(tweetsResponse.data);
+    } catch (error) {
+        if (error.response) {
+            // Error de la API de Twitter
+            console.error('Error en la respuesta de Twitter:', error.response.data);
+            res.status(error.response.status).json(error.response.data);
+        } else if (error.request) {
+            // No se recibió respuesta de la API
+            console.error('No se recibió respuesta de Twitter:', error.request);
+            res.status(500).send('No se pudo conectar con la API de Twitter.');
+        } else {
+            // Otros errores
+            console.error('Error desconocido:', error.message);
+            res.status(500).send('Error en el servidor.');
+        }
+    }
+});
+
+router.get('/influencer', async (req, res) => {
+    const username = req.query.username;
+    if (!username) {
+        return res.status(400).json({ error: 'Se requiere un nombre de usuario.' });
+    }
+
+    try {
+        const response = await axios.get(
+            `https://api.twitter.com/2/users/by/username/${username}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
+                },
+            }
+        );
+
+        // Información del usuario
+        const user = response.data.data;
+
+        res.json({
+            username: user.username,
+            name: user.name,
+            description: user.description,
+            followers_count: user.public_metrics.followers_count,
+            tweet_count: user.public_metrics.tweet_count,
+        });
+    } catch (error) {
+        console.error('Error al obtener información del usuario:', error.response ? error.response.data : error.message);
+        res.status(error.response ? error.response.status : 500).json({ error: 'No se pudo obtener información del usuario.' });
+    }
+});
+
+module.exports = router;
