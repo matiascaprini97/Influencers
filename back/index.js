@@ -1,11 +1,19 @@
-const server = require("./src/app.js");
-const { conn } = require("./src/db.js")
+const cors = require('cors');
+const app = require("./app.js");
+const dotenv = require('dotenv');
 
-const PORT = 3001;
 
-conn.sync({ force: true }).then(() => {
-    console.log("DB connect success");
-    server.listen(PORT, () => {
-        console.log(`Server raised in port: ${PORT}`)
-    });
+dotenv.config();
+// Configuro CORS
+app.use(cors({
+    origin: '*', // Permitir todas las solicitudes
+    methods: ['GET', 'POST'], // Métodos permitidos
+}));
+
+// Iniciar el servidor
+const PORT = process.env.PORT || 3000;
+console.log(process.env.TWITTER_BEARER_TOKEN)
+
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });
