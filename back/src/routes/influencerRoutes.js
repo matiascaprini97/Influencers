@@ -59,7 +59,8 @@ router.get('/influencer', async (req, res) => {
     }
 
     try {
-        const response = await axios.get(
+        // Obtener el ID del usuario
+        const userResponse = await axios.get(
             `https://api.twitter.com/2/users/by/username/${username}`,
             {
                 headers: {
@@ -68,19 +69,32 @@ router.get('/influencer', async (req, res) => {
             }
         );
 
-        // Información del usuario
-        const user = response.data.data;
+        const userId = userResponse.data.data.id;
 
-        res.json({
-            username: user.username,
-            name: user.name,
-            description: user.description,
-            followers_count: user.public_metrics.followers_count,
-            tweet_count: user.public_metrics.tweet_count,
-        });
+        // Obtener tweets recientes
+        const tweetsResponse = await axios.get(
+            `https://api.twitter.com/2/users/${userId}/tweets`,
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
+                },
+                params: {
+                    max_results: 5, // Número de tweets a obtener
+                    "tweet.fields": "created_at,public_metrics", // Campos adicionales
+                },
+            }
+        );
+
+        // Procesar tweets para enviar solo los datos necesarios
+        const tweets = tweetsResponse.data.data.map(tweet => ({
+            id: tweet.id,
+            text: tweet.text,
+        }));
+
+        res.json({ tweets, meta: tweetsResponse.data.meta });
     } catch (error) {
-        console.error('Error al obtener información del usuario:', error.response ? error.response.data : error.message);
-        res.status(error.response ? error.response.status : 500).json({ error: 'No se pudo obtener información del usuario.' });
+        console.error('Error al obtener los tweets:', error.response ? error.response.data : error.message);
+        res.status(error.response ? error.response.status : 500).json({ error: 'Error al obtener los tweets.' });
     }
 });
 
