@@ -91,7 +91,7 @@ router.get('/influencer', async (req, res) => {
             text: tweet.text,
         }));
 
-        res.json({ tweets, }); //meta: tweetsResponse.data.meta
+        res.json({ tweets, meta: tweetsResponse.data.meta });
     } catch (error) {
         console.error('Error al obtener los tweets:', error.response ? error.response.data : error.message);
         res.status(error.response ? error.response.status : 500).json({ error: 'Error al obtener los tweets.' });

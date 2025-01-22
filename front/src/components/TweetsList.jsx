@@ -13,7 +13,7 @@ const TweetsList = () => {
         setError('');
         try {
             const response = await axios.get(`${URL}/tweets?username=${username}`);
-            setTweets(response.data.tweets);
+            setTweets(response.data.data); //
         } catch (err) {
             setError('No se pudieron obtener los tweets. Por favor, intenta nuevamente.');
         } finally {
