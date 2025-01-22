@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-const URL = "http://localhost:3000/api/influencers"
+const URL = "http://localhost:3000/api/influencers";
 
 const TweetsList = () => {
     const [username, setUsername] = useState('');
@@ -13,11 +13,28 @@ const TweetsList = () => {
         setError('');
         try {
             const response = await axios.get(`${URL}/tweets?username=${username}`);
-            setTweets(response.data.data); //
+            setTweets(response.data.data.map(tweet => ({ ...tweet, category: '' }))); // Añadimos campo categoría
         } catch (err) {
             setError('No se pudieron obtener los tweets. Por favor, intenta nuevamente.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCategoryChange = async (id, category) => {
+        try {
+            // Enviar la categoría al backend
+            await axios.post(`http://localhost:3000/api/tweets/${id}/category`, { category });
+
+            // Actualizar la categoría en el estado local
+            setTweets(prevTweets =>
+                prevTweets.map(tweet =>
+                    tweet.id === id ? { ...tweet, category } : tweet
+                )
+            );
+        } catch (error) {
+            console.error('Error al guardar la categoría:', error);
+            alert('No se pudo guardar la categoría. Intenta nuevamente.');
         }
     };
 
@@ -41,7 +58,14 @@ const TweetsList = () => {
             <ul>
                 {tweets.map((tweet) => (
                     <li key={tweet.id} style={{ marginBottom: '10px' }}>
-                        {tweet.text}
+                        <p>{tweet.text}</p>
+                        <input
+                            type="text"
+                            placeholder="Categoría"
+                            value={tweet.category || ''}
+                            onChange={(e) => handleCategoryChange(tweet.id, e.target.value)}
+                            style={{ padding: '5px', width: '150px' }}
+                        />
                     </li>
                 ))}
             </ul>
@@ -50,3 +74,14 @@ const TweetsList = () => {
 };
 
 export default TweetsList;
+
+//const saveCategory = async (tweetId, category) => {
+//   try {
+//       const response = await axios.post(`${URL}/tweets/${tweetId}/category`, { category });
+//       console.log('Categoría guardada:', response.data);
+//   } catch (error) {
+//      console.error('Error al guardar la categoría:', error);
+//  }
+//};
+
+//export default TweetsList;

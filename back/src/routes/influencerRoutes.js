@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 
+// Simulación de almacenamiento en memoria
+const tweetCategories = {};
+
 // Ruta para obtener influencers
 router.get('/', (req, res) => {
     res.send('Endpoint para buscar influencers');
 });
-
 
 router.get('/tweets', async (req, res) => {
     const username = req.query.username; // Obtener nombre del influencer
@@ -96,6 +98,24 @@ router.get('/influencer', async (req, res) => {
         console.error('Error al obtener los tweets:', error.response ? error.response.data : error.message);
         res.status(error.response ? error.response.status : 500).json({ error: 'Error al obtener los tweets.' });
     }
+});
+
+// Nueva ruta para guardar categorías de tweets
+router.post('/tweets/:id/category', (req, res) => {
+    const { id } = req.params;
+    const { category } = req.body;
+
+    if (!category) {
+        return res.status(400).json({ error: 'Category is required' });
+    }
+
+    // Guardar la categoría en el almacenamiento en memoria
+    if (!tweetCategories[id]) {
+        tweetCategories[id] = [];
+    }
+    tweetCategories[id].push(category);
+
+    res.status(200).json({ message: 'Category saved successfully', data: tweetCategories[id] });
 });
 
 module.exports = router;
