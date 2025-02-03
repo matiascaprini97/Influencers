@@ -102,20 +102,21 @@ router.get('/influencer', async (req, res) => {
 
 // Nueva ruta para guardar categorías de tweets
 router.post('/tweets/:id/category', (req, res) => {
-    const { id } = req.params;
-    const { category } = req.body;
+    const { id } = req.params; // ID del tweet
+    const { category } = req.body; // Categoría enviada desde el frontend
 
     if (!category) {
-        return res.status(400).json({ error: 'Category is required' });
+        return res.status(400).json({ error: 'La categoría es requerida.' });
     }
 
-    // Guardar la categoría en el almacenamiento en memoria
-    if (!tweetCategories[id]) {
-        tweetCategories[id] = [];
+    // Simula almacenamiento en memoria (temporal)
+    if (!global.tweetCategories) {
+        global.tweetCategories = {};
     }
-    tweetCategories[id].push(category);
 
-    res.status(200).json({ message: 'Category saved successfully', data: tweetCategories[id] });
+    global.tweetCategories[id] = category;
+
+    res.json({ message: 'Categoría guardada exitosamente.' });
 });
 
 module.exports = router;

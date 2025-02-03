@@ -24,7 +24,7 @@ const TweetsList = () => {
     const handleCategoryChange = async (id, category) => {
         try {
             // Enviar la categoría al backend
-            await axios.post(`http://localhost:3000/api/tweets/${id}/category`, { category });
+            await axios.post(`${URL}/tweets/${id}/category`, { category });
 
             // Actualizar la categoría en el estado local
             setTweets(prevTweets =>

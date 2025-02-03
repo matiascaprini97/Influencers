@@ -24,7 +24,6 @@ app.use(express.json());
 
 // Rutas
 app.use('/api/influencers', influencerRoutes);
-
 // Error catching endware.
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   const status = err.status || 500;
